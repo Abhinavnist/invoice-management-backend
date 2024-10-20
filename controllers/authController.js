@@ -5,7 +5,7 @@ const sendEmail = require("../utils/sendEmail")
 
 // Generate JWT
 const generateToken = (id) => {
-  return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: "30d" })
+  return jwt.sign({ id }, "secretkey", { expiresIn: "30d" })
 }
 
 // Register a new user
@@ -23,7 +23,7 @@ exports.signupUser = async (req, res) => {
     const user = await User.create({
       name,
       email,
-      password, // Will be hashed due to pre-save middleware in the model
+      password,
     })
 
     res.status(201).json({
@@ -32,13 +32,14 @@ exports.signupUser = async (req, res) => {
       token: generateToken(user._id),
     })
   } catch (error) {
-    res.status(500).json({ message: "Server error" })
+    console.error("Error during signup:", error) // Log the actual error
+    res.status(500).json({ message: "Server error", error: error.message })
   }
 }
+
 // Login User
 exports.loginUser = async (req, res) => {
   const { email, password } = req.body
-  console.log(req.body)
 
   try {
     const user = await User.findOne({ email })
@@ -52,7 +53,8 @@ exports.loginUser = async (req, res) => {
       token: generateToken(user._id),
     })
   } catch (error) {
-    res.status(500).json({ message: "Server error" })
+    console.error("Error during login:", error) // Log the actual error
+    res.status(500).json({ message: "Server error", error: error.message })
   }
 }
 
